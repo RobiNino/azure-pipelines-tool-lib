@@ -19,7 +19,6 @@ let requestOptions = {
     proxy: tl.getHttpProxyConfiguration(),
     cert: tl.getHttpCertConfiguration()
 } as ifm.IRequestOptions;
-let http: httpm.HttpClient = new httpm.HttpClient(userAgent, null, requestOptions);
 tl.setResourcePath(path.join(__dirname, 'lib.json'));
 
 export function debug(message: string): void {
@@ -194,10 +193,13 @@ export function findLocalToolVersions(toolName: string, arch?: string) {
  *
  * @param url       url of tool to download
  * @param fileName  optional fileName.  Should typically not use (will be a guid for reliability). Can pass fileName with an absolute path.
+ * @param handlers  optional handlers array.  Handlers to pass to the HttpClient for the tool download.
  */
-export async function downloadTool(url: string, fileName?: string): Promise<string> {
+export async function downloadTool(url: string, fileName?: string, handlers?: ifm.IRequestHandler[]): Promise<string> {
     return new Promise<string>(async (resolve, reject) => {
         try {
+            handlers = handlers || null;
+            let http: httpm.HttpClient = new httpm.HttpClient(userAgent, handlers, requestOptions);
             tl.debug(fileName);
             fileName = fileName || uuidV4();
 
@@ -221,7 +223,7 @@ export async function downloadTool(url: string, fileName?: string): Promise<stri
             if (fs.existsSync(destPath)) {
                 throw new Error("Destination file path already exists");
             }
-            
+
             tl.debug('downloading');
             const statusCodesToRetry = [httpm.HttpCodes.BadGateway, httpm.HttpCodes.ServiceUnavailable, httpm.HttpCodes.GatewayTimeout];
             let retryCount: number = 1;
@@ -235,7 +237,7 @@ export async function downloadTool(url: string, fileName?: string): Promise<stri
                 tl.debug(`Downloading attempt "${retryCount}" of "${maxRetries}"`);
                 response = await http.get(url);
             }
-            
+
             if (response.message.statusCode != 200) {
                 let err: Error = new Error('Unexpected HTTP response: ' + response.message.statusCode);
                 err['httpStatusCode'] = response.message.statusCode;
@@ -502,7 +504,7 @@ function _createExtractFolder(dest?: string): string {
     }
 
     tl.mkdirP(dest);
-    
+
     return dest;
 }
 
@@ -521,6 +523,7 @@ function _createExtractFolder(dest?: string): string {
  * @param regex     regex to use for version matches
  */
 export async function scrape(url: string, regex: RegExp): Promise<string[]> {
+    let http: httpm.HttpClient = new httpm.HttpClient(userAgent, null, requestOptions);
     let output: string = await (await http.get(url)).readBody();
 
     let matches = output.match(regex);
