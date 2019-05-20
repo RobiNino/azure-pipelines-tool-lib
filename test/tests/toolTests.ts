@@ -185,7 +185,7 @@ describe('Tool Tests', function () {
             // First try downloading with WRONG credentials and verify receiving status code 401:
             try {
                 let basicAuthHandler = [new hm.BasicCredentialHandler(username, "WrongPassword")];
-                let downPath: string = await toolLib.downloadTool(url,null, basicAuthHandler);
+                let downPath: string = await toolLib.downloadTool(url, null, basicAuthHandler);
 
                 reject(new Error('Should have received status code 401 when downloading with bad credentials'));
             }
@@ -195,7 +195,7 @@ describe('Tool Tests', function () {
 
                     // Then try downloading with the CORRECT credentials and verify file downloaded:
                     let basicAuthHandler = [new hm.BasicCredentialHandler(username, correctPassword)];
-                    let downPath: string = await toolLib.downloadTool(url,null, basicAuthHandler);
+                    let downPath: string = await toolLib.downloadTool(url, null, basicAuthHandler);
 
                     assert(tl.exist(downPath), 'File should have been downloaded');
                     resolve()
