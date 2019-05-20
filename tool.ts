@@ -223,7 +223,7 @@ export async function downloadTool(url: string, fileName?: string, handlers?: if
             if (fs.existsSync(destPath)) {
                 throw new Error("Destination file path already exists");
             }
-
+            
             tl.debug('downloading');
             const statusCodesToRetry = [httpm.HttpCodes.BadGateway, httpm.HttpCodes.ServiceUnavailable, httpm.HttpCodes.GatewayTimeout];
             let retryCount: number = 1;
@@ -237,7 +237,7 @@ export async function downloadTool(url: string, fileName?: string, handlers?: if
                 tl.debug(`Downloading attempt "${retryCount}" of "${maxRetries}"`);
                 response = await http.get(url);
             }
-
+            
             if (response.message.statusCode != 200) {
                 let err: Error = new Error('Unexpected HTTP response: ' + response.message.statusCode);
                 err['httpStatusCode'] = response.message.statusCode;
@@ -504,7 +504,7 @@ function _createExtractFolder(dest?: string): string {
     }
 
     tl.mkdirP(dest);
-
+    
     return dest;
 }
 
